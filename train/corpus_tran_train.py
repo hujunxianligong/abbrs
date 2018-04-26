@@ -103,5 +103,5 @@ class Pretreatment:
 
 if __name__ == '__main__':
     pt = Pretreatment()
-    pt.get_train_pretreatment()
-    #pt.one_parse('历城区山本壹金餐厅')
+    #pt.get_train_pretreatment()
+    pt.one_parse('上海红门包装设计有限公司')

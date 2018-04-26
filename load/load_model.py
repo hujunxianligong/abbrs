@@ -92,10 +92,11 @@ def get_model_abbr(company_name):
     recCom_instance._addTerms(fullname)
     richTermList = recCom_instance._parse()
     result = reg_result_classify(company_name,richTermList)
+    result.merge_wterm_include_type()
     print(result.set_api_json())
     recCom_instance._clear()
 
     return result
 
 if __name__ == '__main__':
-    get_model_abbr('湖南爱奇艺影视发展有限公司')
+    get_model_abbr('上海国鼎建设工程发展集团有限公司')

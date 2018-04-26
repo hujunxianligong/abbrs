@@ -17,7 +17,10 @@ def abb_classify():
         for key in data:
             data = key
             break
-    data = re.sub(u'[\(（）\)]', '', data)
+        print(data)
+        data = re.sub(u'[\(（）\)]', '', data)
+    else:
+        data = re.sub(u'[\(（）\)]', '', data.decode('UTF-8'))
     result = get_model_abbr(data)
     json = result.set_api_json()
     del result
@@ -27,7 +30,7 @@ if __name__ == "__main__":
     try:
         port = int(sys.argv[1])
     except ValueError and IndexError:
-        port = 5005
+        port = 5007
 
     while True:
         try:

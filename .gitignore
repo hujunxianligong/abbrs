@@ -13,6 +13,7 @@ venv
 
 # other
 .DS_Store
+config.py
 
 .idea/
 

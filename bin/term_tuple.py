@@ -26,6 +26,35 @@ class NameTerm:
     def __init__(self, companyname):
         self.company_name = companyname
         self.words_term = []
+        self.before_merge_words_term = []
+
+    def merge_wterm_include_type(self):
+        if len(self.words_term) == 1:
+            self.before_merge_words_term = self.words_term
+            return
+
+        for word_term in self.words_term:
+            self.before_merge_words_term.append(word_term)
+
+        self.words_term.clear()
+        first_flag = True
+
+        for word_term in self.before_merge_words_term:
+            if first_flag:
+                before = word_term
+                first_flag = False
+                continue
+            if before.type == word_term.type:
+                before.e_offset += len(word_term.word)
+                before.word = ''.join([before.word,word_term.word])
+            else:
+                if not before:
+                    self.add_word_term(word_term)
+                else:
+                    self.add_word_term(before)
+                    before = word_term
+        self.add_word_term(before)
+
 
     def add_word_term(self,word_term):
         self.words_term.append(word_term)
@@ -68,6 +97,7 @@ class NameTerm:
         data = {'company_name': self.company_name, 'word_term': name_term_json}
         json = json.dumps(data, sort_keys=True, ensure_ascii=False)
         return json
+
 
 class WordTerm:
     def __init__(self, word,start_offset,end_offset):
