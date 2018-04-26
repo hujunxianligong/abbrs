@@ -53,6 +53,8 @@ def reg_result_classify(company_name,richTermList):
     str = ''
     type = 'OUT'
     for richterm in richTermList:
+        if richterm.char == '#':
+            continue
         mark = richterm.wheater
         if 'R' in mark:
             type = 'R'
@@ -84,6 +86,10 @@ def reg_result_classify(company_name,richTermList):
             str = ''
             e_offset += 1
             s_offset = e_offset
+    if str.strip():
+        one = WordTerm(str, s_offset, e_offset)
+        one.set_type(type)
+        result.add_word_term(one)
     return result
 
 def get_model_abbr(company_name):
@@ -99,4 +105,4 @@ def get_model_abbr(company_name):
     return result
 
 if __name__ == '__main__':
-    get_model_abbr('上海国鼎建设工程发展集团有限公司')
+    get_model_abbr('三穗县顺景花场')

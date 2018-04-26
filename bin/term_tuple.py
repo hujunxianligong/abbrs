@@ -29,7 +29,7 @@ class NameTerm:
         self.before_merge_words_term = []
 
     def merge_wterm_include_type(self):
-        if len(self.words_term) == 1:
+        if len(self.words_term) <= 1:
             self.before_merge_words_term = self.words_term
             return
 

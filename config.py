@@ -39,5 +39,4 @@ if DEBUG:
     MYSQL_DB = config_debug.MYSQL_DB
 
     CORPUS_PROCRSS_RESULT_PATH = config_debug.CORPUS_PROCRSS_RESULT_PATH
-
-    CRF_MODEL_FILE = config_debug.CRF_MODEL_FILE
+    CRF_MODEL_FILE =config_debug.CRF_MODEL_FILE
