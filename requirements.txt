@@ -2,3 +2,4 @@ Flask==0.12.2
 libvirt-python==3.10.0
 PyMySQL==0.7.11
 requests==2.9.1
+gunicorn==19.7.1

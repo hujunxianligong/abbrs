@@ -24,7 +24,6 @@ class Pretreatment:
                 cp_name = companyname[0].strip()
                 cp_term = self.one_parse(cp_name)
                 cp_term_list.append(cp_term)
-
         #写出返回
         t = ''.join([str(int(time.time())),'_'])
         companyname_outPath = ''.join([config.CORPUS_PROCRSS_RESULT_PATH,t,'companyname'])
@@ -40,12 +39,9 @@ class Pretreatment:
             sb = ''.join([sb, '#SENT_END#\tend\n\n'])
             outPut.write(str(sb))
             jsonout.write(''.join([cp.name_to_json(),'\n']))
-
         jsonout.close()
         outPut.close()
         cpout.close()
-
-
         return
 
     def one_parse(self,cp):
@@ -77,7 +73,6 @@ class Pretreatment:
                             break
                     else:
                         break
-        return
 
     def get_unknown_type(self,cp_term):
         cp_name = cp_term.company_name

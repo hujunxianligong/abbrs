@@ -1,8 +1,12 @@
 # -*- coding: UTF-8 -*
-import  CRFPP
+import os
+
+import CRFPP
+import sys
+
 import config
 
-from bin.term_tuple import  crf_reg_result, WordTerm, NameTerm
+from bin.term_tuple import crf_reg_result, NameTerm, WordTerm
 
 '''
 成分识别类
