@@ -18,7 +18,7 @@ MYSQL_PASS = "wangniasd1"
 MYSQL_DB = "tree_development"
 
 # 语料处理结果路径
-CORPUS_PROCRSS_RESULT_PATH = '/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180425/'
+CORPUS_PROCRSS_RESULT_PATH = '/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180427/'
 
 #CRF模型路径
 CRF_MODEL_FILE = '/home/hadoop/abbreviation/abbs_seg/model/crf_model_180426.'

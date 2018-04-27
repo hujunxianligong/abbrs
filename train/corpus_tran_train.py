@@ -1,8 +1,11 @@
 # -*- coding: UTF-8 -*-
+import re
 import time
 
+from pyhanlp import HanLP, SafeJClass
+
 import config
-from bin.term_tuple import NameTerm, WordTerm, CharTerm
+from bin.term_tuple import NameTerm, WordTerm, CharTerm, WORD_TYPE
 from train.get_corpus import get_sql_cpname
 
 from util.tool import read_dic
@@ -16,7 +19,7 @@ class Pretreatment:
 
     def get_train_pretreatment(self):
         #获取语料
-        unprocessed_corpus = get_sql_cpname(['limit:10000','tabNum:50','random:Y'])
+        unprocessed_corpus = get_sql_cpname(['limit:10000','tabNum:30','random:Y'])
         #加工语料
         cp_term_list = []
         for companyname in unprocessed_corpus:
@@ -46,17 +49,32 @@ class Pretreatment:
 
     def one_parse(self,cp):
         print(cp)
+        cp = re.sub('[\(（）\)]', '', cp)
         cp_term = NameTerm(cp)
+         # 获取单词与词性
+        segments=HanLP.segment(cp)
+        print(str(segments))
         self.match_word_type(cp_term, 'region', self.region_dic)
         self.match_word_type(cp_term, 'organization', self.organization_dic)
         self.match_word_type(cp_term, 'industry', self.industry_dic)
+        #self.match_seg_word_type(cp_term, segments, 'region', self.region_dic)
+        self.match_seg_word_type(cp_term, segments, 'organization', self.organization_dic)
+        self.match_seg_word_type(cp_term, segments, 'industry', self.industry_dic)
         self.get_unknown_type(cp_term)
         cp_term.sort_word_term()
+        cp_term.deduplication_word()
         # print(cp_term.name_to_json())
-        # print(cp_term.name_crf_model())
+        #print(cp_term.set_api_json())
+        #print(cp_term.name_crf_model())
         return cp_term
 
+    def match_seg_word_type(self,cp_term,seg_ments,type_name,type_dic):
+        c_index = 0
+        for segment in seg_ments:
 
+            if segment.word in type_dic:
+                self.struct_word_terms(cp_term, segment.word, c_index, type_name)
+            c_index += len(segment.word)
 
     def match_word_type(self,cp_term,type_name,type_dic):
         cp_name =cp_term.company_name
@@ -93,8 +111,10 @@ class Pretreatment:
     def struct_word_terms(self,cp_term,word,index,type_name):
         cp_name = cp_term.company_name
         word_term = WordTerm(word, index, index + len(word) - 1)
+        word_term.set_type(WORD_TYPE[type_name])
+        se_index = index
         for s_char in word:
-            se_index = cp_name.find(s_char, index)
+            se_index = cp_name.find(s_char, se_index)
             char_term = CharTerm(s_char, se_index, type_name)
             char_term.char_position(index, index + len(word) - 1, se_index)
             word_term.add_char_term(char_term)
@@ -103,5 +123,5 @@ class Pretreatment:
 
 if __name__ == '__main__':
     pt = Pretreatment()
-    #pt.get_train_pretreatment()
-    pt.one_parse('上海红门包装设计有限公司')
+    pt.get_train_pretreatment()
+    #pt.one_parse('苏州旭飞科技有限公司')

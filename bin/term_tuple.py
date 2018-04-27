@@ -25,6 +25,7 @@ class crf_reg_result:
 class NameTerm:
     def __init__(self, companyname):
         self.company_name = companyname
+
         self.words_term = []
         self.before_merge_words_term = []
 
@@ -74,6 +75,28 @@ class NameTerm:
         if len(self.words_term):
             self.words_term.sort(key=lambda WordTerm: WordTerm.s_offset)
 
+    def deduplication_word(self):
+
+        if len(self.words_term) <= 1:
+
+            return
+        tmp_term = []
+        for word_term in self.words_term:
+            tmp_term.append(word_term)
+
+        self.words_term.clear()
+        first_flag = True
+        for term in tmp_term:
+            if first_flag:
+                b_term = term
+                first_flag = False
+                continue;
+            if term.s_offset <=b_term.e_offset:
+                continue
+            else:
+                self.add_word_term(b_term)
+            b_term = term
+        self.add_word_term(b_term)
 
     def name_crf_model(self):
         name_demo = ''
