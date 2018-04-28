@@ -20,4 +20,4 @@ MYSQL_DB = "tree_development"
 CORPUS_PROCRSS_RESULT_PATH = '/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180427/'
 
 #CRF模型路径
-CRF_MODEL_FILE = '/mnt/vol_0/wnd/usr/cmb_in/模型文件/add_hanlp_seg_Model.crfpp'
+CRF_MODEL_FILE = '/mnt/vol_0/wnd/usr/cmb_in/模型文件/ret_crf.model'

@@ -2,7 +2,7 @@
 import re
 import time
 
-from pyhanlp import HanLP, SafeJClass
+from pyhanlp import HanLP
 
 import config
 from bin.term_tuple import NameTerm, WordTerm, CharTerm, WORD_TYPE
@@ -19,7 +19,7 @@ class Pretreatment:
 
     def get_train_pretreatment(self):
         #获取语料
-        unprocessed_corpus = get_sql_cpname(['limit:10000','tabNum:30','random:Y'])
+        unprocessed_corpus = get_sql_cpname(['limit:10','tabNum:2','random:Y'])
         #加工语料
         cp_term_list = []
         for companyname in unprocessed_corpus:
@@ -64,7 +64,7 @@ class Pretreatment:
         cp_term.sort_word_term()
         cp_term.deduplication_word()
         # print(cp_term.name_to_json())
-        #print(cp_term.set_api_json())
+        print(cp_term.set_api_json())
         #print(cp_term.name_crf_model())
         return cp_term
 
@@ -123,5 +123,5 @@ class Pretreatment:
 
 if __name__ == '__main__':
     pt = Pretreatment()
-    pt.get_train_pretreatment()
-    #pt.one_parse('苏州旭飞科技有限公司')
+    #pt.get_train_pretreatment()
+    pt.one_parse('山东海力化工股份有限公司')

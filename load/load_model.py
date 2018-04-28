@@ -105,4 +105,4 @@ def get_model_abbr(company_name):
     return result
 
 if __name__ == '__main__':
-    get_model_abbr('三穗县顺景花场')
+    get_model_abbr('中银基金管理有限公司')
