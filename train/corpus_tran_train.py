@@ -17,14 +17,21 @@ class Pretreatment:
         self.industry_dic = read_dic(config.INDUSTRY_FILE)
         self.organization_dic = read_dic(config.ORGANIZATION_FILE)
 
-    def get_train_pretreatment(self):
+    def get_train_pretreatment(self,type,inputfile):
         #获取语料
-        unprocessed_corpus = get_sql_cpname(['limit:10','tabNum:2','random:Y'])
+        if type == 'mysql' and config.MYSQL_ENABLE:
+            unprocessed_corpus = get_sql_cpname(['limit:10','tabNum:2','random:Y'])
+        else:
+            unprocessed_corpus = read_dic(inputfile)
         #加工语料
         cp_term_list = []
         for companyname in unprocessed_corpus:
             if isinstance(companyname,tuple):
                 cp_name = companyname[0].strip()
+                cp_term = self.one_parse(cp_name)
+                cp_term_list.append(cp_term)
+            elif isinstance(companyname,str):
+                cp_name = companyname
                 cp_term = self.one_parse(cp_name)
                 cp_term_list.append(cp_term)
         #写出返回
@@ -46,6 +53,8 @@ class Pretreatment:
         outPut.close()
         cpout.close()
         return
+
+
 
     def one_parse(self,cp):
         print(cp)
@@ -123,5 +132,5 @@ class Pretreatment:
 
 if __name__ == '__main__':
     pt = Pretreatment()
-    #pt.get_train_pretreatment()
-    pt.one_parse('山东海力化工股份有限公司')
+    pt.get_train_pretreatment('mysql',"/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180427/1524934560_companyname")
+    #pt.one_parse('山东海力化工股份有限公司')
