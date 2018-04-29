@@ -11,6 +11,7 @@ def read_dic(filePath=None):
                 if line.startswith('#'):
                     continue
                 content.append(line.strip('\n'))
-    sorted(content,key=lambda x: len(x))
+    content.sort(key=lambda x: len(x))
+    content.reverse()
 
     return content

@@ -27,7 +27,7 @@ class Pretreatment:
 
         #获取语料
         if type == 'mysql' and config.MYSQL_ENABLE:
-            unprocessed_corpus = get_sql_cpname(['limit:10','tabNum:2','random:Y'])
+            unprocessed_corpus = get_sql_cpname(['limit:5000','tabNum:60','random:Y'])
         else:
             unprocessed_corpus = read_dic(inputfile)
         #加工语料
@@ -74,11 +74,12 @@ class Pretreatment:
         self.match_word_type(cp_term, 'organization', self.organization_dic)
         self.match_word_type(cp_term, 'industry', self.industry_dic)
         #self.match_seg_word_type(cp_term, segments, 'region', self.region_dic)
-        self.match_seg_word_type(cp_term, segments, 'organization', self.organization_dic)
+        #self.match_seg_word_type(cp_term, segments, 'organization', self.organization_dic)
         self.match_seg_word_type(cp_term, segments, 'industry', self.industry_dic)
         self.get_unknown_type(cp_term)
         cp_term.sort_word_term()
         cp_term.deduplication_word()
+        print(cp_term.set_api_json())
         return cp_term
 
     def match_seg_word_type(self,cp_term,seg_ments,type_name,type_dic):
@@ -136,5 +137,5 @@ class Pretreatment:
 
 if __name__ == '__main__':
     pt = Pretreatment()
-    pt.get_train_pretreatment('mysql',"/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180427/1524934560_companyname")
-    #pt.one_parse('山东海力化工股份有限公司')
+    #pt.get_train_pretreatment('other','/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180504/1524990950_companyname')
+    pt.one_parse('宜州市糖业生产管理局')
