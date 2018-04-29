@@ -63,18 +63,44 @@ hanlp配置修改，请进入pyhanlp依赖目录下中替换`hanlp.properties`
 
 * 训练集生成
 ```
-在train/corpus_tran_train.py方法里面调用方法
+在train/corpus_tran_train.py方法里面调用方法.
+假如有一个公司名文件调用下面的函数传入文件名路径即可再配置文件的输出路径得到结果
 pt = Pretreatment()
 pt.get_train_pretreatment(None,{$companyNamePathFile})
 ```
 
-* 访问接口
+* 模型训练
+<br>在已经安装完成CRF++ 环境下使用命令行对训练集进行训练<br>
 ```
-$curl -d "华为技术有限公司" http://localhost:5007/api/abbner
+$ crf_learn -c 1 -f 1 template {$训练集路径} {$输出模型文件路径}
 ```
+[N]:template是训练时生成特征函数的特征模板，根据自身需求制定。
+目前使用的分类魔板如下:
+```txt
+# Unigram
+U00:%x[-2,0]
+U01:%x[-1,0]
+U02:%x[0,0]
+U03:%x[1,0]
+U04:%x[2,0]
+U05:%x[-1,0]/%x[0,0]
+U06:%x[0,0]/%x[1,0]
+U07:%x[1,0]/%x[2,0]
+U08:%x[-2,0]/%x[-1,0]
 
-* 目录有接口启动脚本使用bash 启动即可
+
+
+# Bigram
+B
+```
+* API启动
+<br>目录有接口启动脚本使用bash 启动即可
 ```
 $ mkdir log
 $ ./start.sh
 ```
+* 访问接口
+```
+$ curl -d "华为技术有限公司" http://localhost:5007/api/abbner
+```
+
