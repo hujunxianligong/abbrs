@@ -17,7 +17,14 @@ class Pretreatment:
         self.industry_dic = read_dic(config.INDUSTRY_FILE)
         self.organization_dic = read_dic(config.ORGANIZATION_FILE)
 
+
     def get_train_pretreatment(self,type,inputfile):
+        """
+        @summary:根据公司名单得到规整训练集，用于训练
+         @params：type 控制数据源来源，主要是文本跟数据库参数 mysql/None ,inputfile 文件路径，使用数据库链接时可以为None
+         @return:配置文件中已经设置了输出路径 ，这里无返回
+        """
+
         #获取语料
         if type == 'mysql' and config.MYSQL_ENABLE:
             unprocessed_corpus = get_sql_cpname(['limit:10','tabNum:2','random:Y'])
@@ -72,9 +79,7 @@ class Pretreatment:
         self.get_unknown_type(cp_term)
         cp_term.sort_word_term()
         cp_term.deduplication_word()
-        # print(cp_term.name_to_json())
         print(cp_term.set_api_json())
-        #print(cp_term.name_crf_model())
         return cp_term
 
     def match_seg_word_type(self,cp_term,seg_ments,type_name,type_dic):

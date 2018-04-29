@@ -11,11 +11,11 @@ INDUSTRY_FILE = "/home/hadoop/wnd/usr/crf_cp_name_easy/abb/resources/行业名�
 ORGANIZATION_FILE = "/home/hadoop/wnd/usr/crf_cp_name_easy/abb/resources/组织形式.txt"
 
 # 数据库配置
-MYSQL_HOST = "h131"
-MYSQL_PORT = 13306
-MYSQL_USER = "wnd"
-MYSQL_PASS = "wangniasd1"
-MYSQL_DB = "tree_development"
+MYSQL_HOST = ""
+MYSQL_PORT = 3306
+MYSQL_USER = ""
+MYSQL_PASS = ""
+MYSQL_DB = ""
 
 # 语料处理结果路径
 CORPUS_PROCRSS_RESULT_PATH = '/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180425/'
