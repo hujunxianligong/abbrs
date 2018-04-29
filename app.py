@@ -4,7 +4,7 @@ import re
 import sys
 from flask import Flask
 from flask import request
-from load.load_model_remove import get_model_abbr
+from load.load_model import get_model_abbr
 import config as sys_config
 
 app = Flask(__name__)
@@ -18,9 +18,9 @@ def abb_classify():
             data = key
             break
         print(data)
-        data = re.sub(u'[\(（）\)]', '', data)
+        data = re.sub('[\(（）\)]', '', data)
     else:
-        data = re.sub(u'[\(（）\)]', '', data.decode('UTF-8'))
+        data = re.sub('[\(（）\)]', '', data.decode('UTF-8'))
     result = get_model_abbr(data)
     json = result.set_api_json()
     del result

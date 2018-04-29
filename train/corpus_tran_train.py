@@ -69,7 +69,7 @@ class Pretreatment:
         cp_term = NameTerm(cp)
          # 获取单词与词性
         segments=HanLP.segment(cp)
-        print(str(segments))
+        print((str(segments)))
         self.match_word_type(cp_term, 'region', self.region_dic)
         self.match_word_type(cp_term, 'organization', self.organization_dic)
         self.match_word_type(cp_term, 'industry', self.industry_dic)
@@ -79,7 +79,6 @@ class Pretreatment:
         self.get_unknown_type(cp_term)
         cp_term.sort_word_term()
         cp_term.deduplication_word()
-        print(cp_term.set_api_json())
         return cp_term
 
     def match_seg_word_type(self,cp_term,seg_ments,type_name,type_dic):
