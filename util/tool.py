@@ -20,6 +20,6 @@ class Seg_han():
     def __init__(self):
         SafeJClass('com.hankcs.hanlp.utility.Predefine').HANLP_PROPERTIES_PATH = '/mnt/vol_0/wnd/usr/workspace/cmb/model/hanlp.properties'
         for term in HanLP.segment('其中流贷为'):
-            print('{}\t{}'.format(term.word, term.nature))  # 获取单词与词性
+            print(('{}\t{}'.format(term.word, term.nature)))  # 获取单词与词性
 if __name__ == "__main__":
     test =Seg_han()

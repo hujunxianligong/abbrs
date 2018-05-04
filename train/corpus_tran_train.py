@@ -62,7 +62,7 @@ class Pretreatment:
         cp_term = NameTerm(cp)
          # 获取单词与词性
         segments=HanLP.segment(cp)
-        print(str(segments))
+        print((str(segments)))
         self.match_word_type(cp_term, 'region', self.region_dic)
         self.match_word_type(cp_term, 'organization', self.organization_dic)
         self.match_word_type(cp_term, 'industry', self.industry_dic)
@@ -73,7 +73,7 @@ class Pretreatment:
         cp_term.sort_word_term()
         cp_term.deduplication_word()
         # print(cp_term.name_to_json())
-        print(cp_term.set_api_json())
+        print((cp_term.set_api_json()))
         #print(cp_term.name_crf_model())
         return cp_term
 
