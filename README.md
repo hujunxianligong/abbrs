@@ -3,10 +3,9 @@
 该代码版本主要是做训练集生成以及加载模型运行接口调用，模型的训练部分请自行参考CRF++训练模型
 
 ## python环境
-请使用python3.0+环境进行操作
+请使用python3环境进行操作
 ## pip安装包
 ```bash
-$ apt-get install libvirt-dev
 $ sudo apt-get install python3-pip
 $ sudo pip3 install --upgrade pip
 $ sudo pip3 install -r requirements.txt
@@ -46,7 +45,7 @@ $ sudo ln -s /usr/local/lib/libcrfpp.so.0 /usr/lib/
 ImportError:/home/×××/anaconda2/bin/.../libstdc++.so.6: versionGLIBCXX_3.4.XX’ not found`
 
 ```
-请更新更新libgcc
+请更新libgcc
 
 hanlp配置修改，请进入pyhanlp依赖目录下中替换`hanlp.properties`
 ```
@@ -75,7 +74,7 @@ pt.get_train_pretreatment(None,{$companyNamePathFile})
 $ crf_learn -c 1 -f 1 template {$训练集路径} {$输出模型文件路径}
 ```
 [N]:template是训练时生成特征函数的特征模板，根据自身需求制定。
-目前使用的分类魔板如下:
+目前使用的分类模板如下:
 ```txt
 # Unigram
 U00:%x[-2,0]
