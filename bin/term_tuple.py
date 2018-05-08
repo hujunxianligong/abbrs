@@ -11,8 +11,8 @@ class crf_reg_result:
         self.wheater = wheater
 
     def __str__(self):
-        result = {'char':self.word}
-        return  str(result)
+        result = {'char': self.word}
+        return str(result)
 
     def set_result(self, result):
         self.wheater = result
@@ -25,11 +25,17 @@ class crf_reg_result:
 class NameTerm:
     def __init__(self, companyname):
         self.company_name = companyname
-
         self.words_term = []
         self.before_merge_words_term = []
 
-    def merge_wterm_include_type(self,type):
+    def remove_word_term(self, index):
+        words_term = self.words_term
+        for i, word_term in enumerate(words_term):
+            if index == i:
+                words_term.remove(word_term)
+                return
+
+    def merge_wterm_include_type(self, type):
         self.before_merge_words_term.clear()
         if len(self.words_term) <= 1:
             self.before_merge_words_term = self.words_term
@@ -61,18 +67,15 @@ class NameTerm:
                     before = word_term
         self.add_word_term(before)
 
-
-    def add_word_term(self,word_term):
+    def add_word_term(self, word_term):
         self.words_term.append(word_term)
 
-
-    def iswordUse(self,index,word):
-
+    def iswordUse(self, index, word):
         if not self.words_term:
             return True
         for word_term in self.words_term:
             if (word_term.e_offset >= index and word_term.s_offset <= index) \
-                    or (word_term.e_offset >= index+len(word)-1 and word_term.s_offset <= index+len(word)-1 ):
+                    or (word_term.e_offset >= index + len(word) - 1 and word_term.s_offset <= index + len(word)-1):
                 return False
         return True
 
@@ -81,9 +84,7 @@ class NameTerm:
             self.words_term.sort(key=lambda WordTerm: WordTerm.s_offset)
 
     def deduplication_word(self):
-
         if len(self.words_term) <= 1:
-
             return
         tmp_term = []
         for word_term in self.words_term:
@@ -95,7 +96,7 @@ class NameTerm:
             if first_flag:
                 b_term = term
                 first_flag = False
-                continue;
+                continue
             if term.s_offset <=b_term.e_offset:
                 continue
             else:
@@ -128,23 +129,23 @@ class NameTerm:
 
 
 class WordTerm:
-    def __init__(self, word,start_offset,end_offset):
+    def __init__(self, word, start_offset, end_offset):
         self.word = word
         self.s_offset = start_offset
         self.e_offset = end_offset
         self.chars_term = []
         self.type = ''
 
-    def set_type(self,type):
+    def set_type(self, type):
         self.type = type
 
-    def add_char_term(self,char_term):
+    def add_char_term(self, char_term):
         self.chars_term.append(char_term)
 
     def word_crf_model(self):
         word_demo = ''
         for char in self.chars_term:
-            word_demo=''.join([word_demo,char.char_crf_model(),'\n'])
+            word_demo = ''.join([word_demo, char.char_crf_model(), '\n'])
         return word_demo
 
     def set_api_json(self):
@@ -158,22 +159,20 @@ class WordTerm:
         chars_term_json = []
         for char in self.chars_term:
             chars_term_json.append(json.loads(char.char_to_json()))
-        data = {'word': self.word, 's_offset': self.s_offset,'e_offset': self.e_offset, 'chars_term': chars_term_json}
+        data = {'word': self.word, 's_offset': self.s_offset, 'e_offset': self.e_offset, 'chars_term': chars_term_json}
         json = json.dumps(data, sort_keys=True,  ensure_ascii=False)
         return json
 
 
 class CharTerm:
-    def __init__(self, cp_char,offset,type):
+    def __init__(self, cp_char, offset, type):
         self.cp_char = cp_char
         self.offset = offset
         self.mark = WORD_TYPE[type]
 
-
-
-    def char_position(self,s_offset,e_offset,offset):
+    def char_position(self, s_offset, e_offset, offset):
         if s_offset == e_offset:
-            self.mark=''.join([self.mark,CHAR_LOCATE['single']])
+            self.mark = ''.join([self.mark, CHAR_LOCATE['single']])
         elif s_offset == offset:
             self.mark = ''.join([self.mark, CHAR_LOCATE['begin']])
         elif e_offset == offset:
@@ -198,9 +197,9 @@ WORD_TYPE = {
     'organization': 'O',
 }
 
-CHAR_LOCATE={
-    'single':'_S',
-    'begin':'_B',
-    'end':'_E',
-    'middle':'_M',
+CHAR_LOCATE = {
+    'single': '_S',
+    'begin': '_B',
+    'end': '_E',
+    'middle': '_M',
 }
