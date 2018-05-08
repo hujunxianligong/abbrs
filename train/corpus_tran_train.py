@@ -91,6 +91,7 @@ class Pretreatment:
         cp_term.deduplication_word()
         self.modify_illegal_classify(cp_term)
         cp_term.merge_wterm_include_type('U')
+
         print(cp_term.set_api_json())
         return cp_term
 
@@ -106,32 +107,89 @@ class Pretreatment:
                             char_term.mark = char_term.mark[:0] + 'U' + char_term.mark[1:]
             submark += 1
 
+        beark_flag = True
+        while beark_flag:#对定义一些出现不合理情况进行选择性纠正
+            beark_flag=  self.define_event_processing(cp_term)
+            cp_term.sort_word_term()
+            cp_term.deduplication_word()
 
+
+    def define_event_processing(self,cp_term):
         qingk2 = ['IU']
         qingk3 = ['IUI', 'IUO', 'ORI', 'UOU', 'UOI']
         qingk4 = ['UIUI', 'ORUO', 'RURI']
+
+        deal_flag = False
         contstr = ''
-        contstr_start_subscript = 0
+
         for word_term in cp_term.words_term:
             type_str = word_term.type
-            contstr = ''.join([contstr,type_str])
-            if len(contstr) == 5:
-                contstr = contstr[1:]
-                contstr_start_subscript += 1
-            for temp in qingk2:
-                if temp  in contstr:
-                    relative_subscript = contstr.index(temp)
+            contstr = ''.join([contstr, type_str])
 
-                    test1 = cp_term.words_term[0]
-                    print(test)
-            for temp in qingk3:
-                if temp in contstr:
-                    test = contstr.index(temp)
+        for temp in qingk4:
+            if temp in contstr:
+                test = contstr.index(temp)
 
-            for temp in qingk4:
-                if temp in contstr:
-                    test = contstr.index(temp)
+        for temp in qingk3:
+            if temp in contstr:
+                relative_subscript = contstr.index(temp)
+                if temp == 'IUI':  # IUI -> I
+                    type_u = cp_term.words_term[relative_subscript + 1]
+                    type_i2 = cp_term.words_term[relative_subscript + 2]
+                    if type_u.s_offset == type_u.e_offset:  # IU(s)I -> I
+                        self.merge_two_word_term(type_u, type_i2, 1)
+                        return True
 
+
+
+
+        for temp in qingk2:
+            if temp in contstr:
+                relative_subscript = contstr.index(temp)
+                if temp == 'IU':
+                    type_i = cp_term.words_term[relative_subscript]
+                    type_u = cp_term.words_term[relative_subscript + 1]
+                    if type_i.s_offset == type_i.e_offset:  # I(s)U -> U
+                        self.merge_two_word_term(type_i, type_u, 1)
+                        return True
+                    elif type_u.s_offset == type_u.e_offset:  # IU(s) -> I
+                        self.merge_two_word_term(type_i, type_u, 0)
+                        return True
+
+        return deal_flag
+
+    def merge_two_word_term(self,fr_word_term,be_word_term,keep_who):
+        if keep_who == 0:
+            fr_word_term.e_offset += len(be_word_term.word)
+            fr_word_term.word = ''.join([fr_word_term.word, be_word_term.word])
+            set_type = fr_word_term.type
+            be_chars_term = be_word_term.chars_term
+            for char_term in be_chars_term:
+                char_term.mark = ''.join([set_type,'_M'])
+            be_chars_term[len(be_chars_term)-1].mark = ''.join([set_type,'_E'])
+
+            last_fr_char_term = fr_word_term.chars_term[len(fr_word_term.chars_term) - 1]
+            last_fr_char_term.mark = ''.join([set_type,'_M'])
+
+            for char_term in be_chars_term:
+                fr_word_term.add_char_term(char_term)
+            return fr_word_term
+        else:
+            be_word_term.s_offset -= len(fr_word_term.word)
+            be_word_term.word = ''.join([fr_word_term.word, be_word_term.word])
+            set_type = be_word_term.type
+            fr_chars_term = fr_word_term.chars_term
+            for char_term in fr_chars_term:
+                char_term.mark = ''.join([set_type,'_M'])
+            fr_chars_term[0].mark = ''.join([set_type, '_B'])
+
+            first_be_char_term = fr_word_term.chars_term[0]
+            first_be_char_term.mark = ''.join([set_type, '_M'])
+
+            for char_term in be_word_term.chars_term:
+                fr_word_term.add_char_term(char_term)
+            be_word_term.chars_term = fr_word_term.chars_term
+            return be_word_term
 
     def get_unknown_type(self, cp_term):
         cp_name = cp_term.company_name
@@ -198,4 +256,4 @@ class Pretreatment:
 if __name__ == '__main__':
     pt = Pretreatment()
     pt.get_train_pretreatment('mysql','/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180504/1525001802_companyname')
-    #pt.one_parse('上海钱多多金融信息服务有限公司')
+    #pt.one_parse('煤田地质四门诊')

@@ -47,7 +47,7 @@ class NameTerm:
                 first_flag = False
                 continue
             if before.type == word_term.type:
-                if not type or type in before.type:
+                if not type or type in before.type :
                     before.e_offset += len(word_term.word)
                     before.word = ''.join([before.word,word_term.word])
                 else:
@@ -78,7 +78,7 @@ class NameTerm:
 
     def sort_word_term(self):
         if len(self.words_term):
-            self.words_term.sort(key=lambda WordTerm: WordTerm.s_offset)
+            self.words_term.sort(key=lambda WordTerm: (WordTerm.s_offset,-len(WordTerm.word)))
 
     def deduplication_word(self):
 
