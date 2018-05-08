@@ -95,7 +95,6 @@ B
 * API启动
 <br>目录有接口启动脚本使用bash 启动即可
 ```
-$ mkdir log
 $ ./start.sh
 ```
 * 访问接口

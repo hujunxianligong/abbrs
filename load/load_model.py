@@ -3,7 +3,6 @@ import os
 
 import CRFPP
 import sys
-
 import config
 
 from bin.term_tuple import crf_reg_result, NameTerm, WordTerm
@@ -56,6 +55,7 @@ def reg_result_classify(company_name, richTermList):
     for richterm in richTermList:
         if richterm.char == '#':
             continue
+        before_type = type
         mark = richterm.wheater
         if 'R' in mark:
             type = 'R'
@@ -67,12 +67,22 @@ def reg_result_classify(company_name, richTermList):
             type = 'O'
 
         if '_S' in mark:
+            if str.strip():
+                one = WordTerm(str, s_offset, e_offset-1)
+                one.set_type(before_type)
+                result.add_word_term(one)
+                s_offset = e_offset
             one = WordTerm(richterm.char, s_offset, e_offset)
             one.set_type(type)
             result.add_word_term(one)
             s_offset += 1
             e_offset += 1
         elif '_B' in mark:
+            if str.strip():
+                one = WordTerm(str, s_offset, e_offset-1)
+                one.set_type(before_type)
+                result.add_word_term(one)
+                s_offset = e_offset
             str = ''
             str = ''.join([str, richterm.char])
             e_offset += 1
@@ -94,13 +104,23 @@ def reg_result_classify(company_name, richTermList):
     return result
 
 
-def get_model_abbr(company_name):
+
+def get_model_abbr(company_name,G=None):
     fullname = list(company_name)
-    recCom_instance = RecCom(config.CRF_MODEL_FILE)
+
+    print(G)
+    if G and not str(G) == 'Namespace()':
+        recCom_instance = RecCom(G.load_model_path)
+        print('FFFFFFFFFF'+G.load_model_path)
+    else:
+        recCom_instance = RecCom(config.CRF_MODEL_FILE)
+
     recCom_instance._addTerms(fullname)
     richTermList = recCom_instance._parse()
     result = reg_result_classify(company_name, richTermList)
-    result.merge_wterm_include_type()
+    result.merge_wterm_include_type(None)
+    #result.merge_wterm_include_type('R')
+    #result.merge_wterm_include_type('I')
     print((result.set_api_json()))
     recCom_instance._clear()
 
@@ -108,4 +128,4 @@ def get_model_abbr(company_name):
 
 
 if __name__ == '__main__':
-    get_model_abbr('中银基金管理有限公司')
+    get_model_abbr('上海野尻眼镜有限公司分公司')

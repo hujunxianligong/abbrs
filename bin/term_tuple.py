@@ -29,7 +29,8 @@ class NameTerm:
         self.words_term = []
         self.before_merge_words_term = []
 
-    def merge_wterm_include_type(self):
+    def merge_wterm_include_type(self,type):
+        self.before_merge_words_term.clear()
         if len(self.words_term) <= 1:
             self.before_merge_words_term = self.words_term
             return
@@ -46,8 +47,12 @@ class NameTerm:
                 first_flag = False
                 continue
             if before.type == word_term.type:
-                before.e_offset += len(word_term.word)
-                before.word = ''.join([before.word,word_term.word])
+                if not type or type in before.type:
+                    before.e_offset += len(word_term.word)
+                    before.word = ''.join([before.word,word_term.word])
+                else:
+                    self.add_word_term(before)
+                    before = word_term
             else:
                 if not before:
                     self.add_word_term(word_term)
@@ -163,6 +168,7 @@ class CharTerm:
         self.cp_char = cp_char
         self.offset = offset
         self.mark = WORD_TYPE[type]
+
 
 
     def char_position(self,s_offset,e_offset,offset):
