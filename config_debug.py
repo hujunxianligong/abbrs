@@ -11,7 +11,7 @@ ORGANIZATION_FILE = "/mnt/vol_0/wnd/usr/cmb_in/词库/组织形式v3-1.txt"
 
 
 # 语料处理结果路径
-CORPUS_PROCRSS_RESULT_PATH = '/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180507/'
+CORPUS_PROCRSS_RESULT_PATH = '/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180509/'
 
 #CRF模型路径
-CRF_MODEL_FILE = '/mnt/vol_0/wnd/usr/cmb_in/模型文件/crf_model_30_180507'
+CRF_MODEL_FILE = '/mnt/vol_0/wnd/usr/cmb_in/模型文件/crf_model_30_180508'

@@ -21,31 +21,39 @@ class Pretreatment:
         self.all_dic = dict(self.industry_dic + self.organization_dic)
         self.all_dic = sorted(self.all_dic.items(), key=lambda x: len(x[0]), reverse=True)
 
-    def get_train_pretreatment(self, type, inputfile):
+    def get_train_pretreatment(self, dict):
         """
         @summary:根据公司名单得到规整训练集，用于训练
          @params：type 控制数据源来源，主要是文本跟数据库参数 mysql/None ,inputfile 文件路径，使用数据库链接时可以为None
          @return:配置文件中已经设置了输出路径 ，这里无返回
         """
 
+
+        if 'type' in dict:
+            input_style = dict['type']
+        if 'mysqlParams' in dict:
+            sql_condition = dict['mysqlParams']
+        if 'inputFile' in dict:
+            inputFile = dict['inputFile']
+
         # 获取语料
-        if type == 'mysql' and config.MYSQL_ENABLE:
-            unprocessed_corpus = get_sql_cpname(['limit:100', 'tabNum:2', 'random:Y'])
+        if input_style == 'mysql' and config.MYSQL_ENABLE:
+            unprocessed_corpus = get_sql_cpname(sql_condition)#['limit:5000', 'tabNum:40', 'random:Y']
         else:
-            unprocessed_corpus = read_dic(inputfile)
+            unprocessed_corpus = read_dic(inputFile)
         # 加工语料
         cp_term_list = []
         i = 0
-        for companyname in unprocessed_corpus:
+        for company_name in unprocessed_corpus:
             i += 1
-            if isinstance(companyname, tuple):
-                cp_name = companyname[0].strip()
+            if isinstance(company_name, tuple):
+                cp_name = company_name[0].strip()
                 cp_term = self.one_parse(cp_name)
                 cp_term_list.append(cp_term)
-            elif isinstance(companyname, str):
-                if len(companyname) > 40:
+            elif isinstance(company_name, str):
+                if len(company_name) > 40:
                     continue
-                cp_name = companyname
+                cp_name = company_name
                 cp_term = self.one_parse(cp_name)
                 cp_term_list.append(cp_term)
         # 写出返回
@@ -184,9 +192,12 @@ class Pretreatment:
             first_be_char_term = fr_word_term.chars_term[0]
             first_be_char_term.mark = ''.join([set_type, '_M'])
 
+            new_chars_term =[]
+            for char_term in fr_chars_term:
+                new_chars_term.append(char_term)
             for char_term in be_word_term.chars_term:
-                fr_word_term.add_char_term(char_term)
-            be_word_term.chars_term = fr_word_term.chars_term
+                new_chars_term.append(char_term)
+            be_word_term.chars_term = new_chars_term
             return be_word_term
 
 
@@ -273,7 +284,7 @@ class Pretreatment:
 
 if __name__ == '__main__':
     pt = Pretreatment()
-
-    #pt.get_train_pretreatment('mysql','/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180504/1525001802_companyname')
-    pt.one_parse('大庆市鸿缘福经贸有限公司')
+    args = {'type': 'none', 'mysqlparams': ['limit:100', 'tabNum:2', 'random:Y'], 'inputfile': '/mnt/vol_0/wnd/usr/cmb_in/ing简称名单/180426/1000多家公司标注数据_样本.txt'}
+    pt.get_train_pretreatment(args)
+    #pt.one_parse('大型压面机压面机价格全自动压面机厂家')
 

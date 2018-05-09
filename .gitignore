@@ -5,6 +5,7 @@ __pycache__/
 # database & logs
 *.db
 logs/*.log
+log/*.log
 *.pid
 *.so
 

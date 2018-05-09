@@ -14,6 +14,7 @@ SEG_API_PORT = 5007
 PLACE_FILE = "/home/hadoop/wnd/usr/crf_cp_name_easy/abb/resources/地名.txt"
 INDUSTRY_FILE = "/home/hadoop/wnd/usr/crf_cp_name_easy/abb/resources/行业名称.txt"
 ORGANIZATION_FILE = "/home/hadoop/wnd/usr/crf_cp_name_easy/abb/resources/组织形式.txt"
+
 # 日志配置
 LOG_DIR = DEFAULT_LOGDIR
 LOG_FORMAT = '%(asctime)s %(process)d %(levelname)s: %(message)s [in %(module)s.%(funcName)s:%(lineno)d]'

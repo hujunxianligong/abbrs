@@ -107,11 +107,8 @@ def reg_result_classify(company_name, richTermList):
 
 def get_model_abbr(company_name,G=None):
     fullname = list(company_name)
-
-    print(G)
     if G and not str(G) == 'Namespace()':
         recCom_instance = RecCom(G.load_model_path)
-        print('FFFFFFFFFF'+G.load_model_path)
     else:
         recCom_instance = RecCom(config.CRF_MODEL_FILE)
 
@@ -119,13 +116,9 @@ def get_model_abbr(company_name,G=None):
     richTermList = recCom_instance._parse()
     result = reg_result_classify(company_name, richTermList)
     result.merge_wterm_include_type(None)
-    #result.merge_wterm_include_type('R')
-    #result.merge_wterm_include_type('I')
     print((result.set_api_json()))
     recCom_instance._clear()
-
     return result
-
 
 if __name__ == '__main__':
     get_model_abbr('上海野尻眼镜有限公司分公司')
