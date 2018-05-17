@@ -1,8 +1,52 @@
 # coding=UTF-8
-#!/usr/bin/python
 
 
-class crf_reg_result:
+class AbbrWord:
+    def __init__(self, abb_chars):
+        self.abb = ''
+        self.full_name = ''
+        for abb_char in abb_chars:
+            if abb_char.wheater == 'K':
+                self.abb = ''.join([self.abb, abb_char.word])
+            self.full_name = ''.join([self.full_name, abb_char.word])
+
+    def get_abb(self):
+        return self.abb
+
+    def show(self):
+        return ''.join([self.full_name, '\t', self.abb])
+
+
+class AbbrChar:
+
+    def __init__(self, word, type_offset):
+        self.word = word
+        self.type_offset = type_offset
+        self.wheater = 'S'
+        self.tone = str(5)
+
+    def set_wheater(self, wheater):
+        self.wheater = wheater
+
+    def set_tone(self, tone):
+        self.tone = str(tone)
+
+    def __str__(self):
+        result = ''.join([self.word, '\t',  str(self.tone), '\t', str(self.type_offset)])
+        # result = ''.join([self.word,  '\t', str(self.type_offset)])
+        return str(result)
+
+    def set_keep(self, keep):
+        self.wheater = keep
+
+    def set_json(self):
+        result = {"word": str(self.word), "type_offset": str(self.type_offset),
+                  "tone": self.tone, "keep": str(self.wheater)}
+        # result = {"word": str(self.word), "type_offset": str(self.type_offset), "keep": str(self.wheater)}
+        return result
+
+
+class CrfRegResult:
     def __init__(self, char):
         self.char = char
         self.wheater = 'S'
@@ -70,18 +114,18 @@ class NameTerm:
     def add_word_term(self, word_term):
         self.words_term.append(word_term)
 
-    def iswordUse(self, index, word):
+    def is_word_use(self, index, word):
         if not self.words_term:
             return True
         for word_term in self.words_term:
-            if (word_term.e_offset >= index and word_term.s_offset <= index) \
+            if (word_term.e_offset >= index >= word_term.s_offset) \
                     or (word_term.e_offset >= index + len(word) - 1 and word_term.s_offset <= index + len(word)-1):
                 return False
         return True
 
     def sort_word_term(self):
         if len(self.words_term):
-            self.words_term.sort(key=lambda WordTerm: (WordTerm.s_offset,-len(WordTerm.word)))
+            self.words_term.sort(key=lambda WordTerm: (WordTerm.s_offset, -len(WordTerm.word)))
 
     def deduplication_word(self):
         if len(self.words_term) <= 1:
@@ -97,7 +141,7 @@ class NameTerm:
                 b_term = term
                 first_flag = False
                 continue
-            if term.s_offset <=b_term.e_offset:
+            if term.s_offset <= b_term.e_offset:
                 continue
             else:
                 self.add_word_term(b_term)
@@ -136,8 +180,8 @@ class WordTerm:
         self.chars_term = []
         self.type = ''
 
-    def set_type(self, type):
-        self.type = type
+    def set_type(self, word_type):
+        self.type = word_type
 
     def add_char_term(self, char_term):
         self.chars_term.append(char_term)
@@ -165,10 +209,10 @@ class WordTerm:
 
 
 class CharTerm:
-    def __init__(self, cp_char, offset, type):
+    def __init__(self, cp_char, offset, char_type):
         self.cp_char = cp_char
         self.offset = offset
-        self.mark = WORD_TYPE[type]
+        self.mark = WORD_TYPE[char_type]
 
     def char_position(self, s_offset, e_offset, offset):
         if s_offset == e_offset:

@@ -8,6 +8,8 @@ import config
 
 if not os.path.exists(config.LOG_DIR):
     os.makedirs(config.LOG_DIR)
+
+
 def __get_logger(logger_name):
     level = logging._nameToLevel[config.LOG_LEVEL.upper()]
     file = os.path.join(config.LOG_DIR, logger_name + '.log')

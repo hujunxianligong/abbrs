@@ -1,6 +1,5 @@
 # -*- coding: UTF-8 -*-
 import random
-
 from util.sql_db_helper import DBHelper
 
 
@@ -11,7 +10,6 @@ def get_sql_cpname(params=None):
     @return:result list/boolean 返回数据库中公司名单
     """
     tables = []
-    access_table = []
     for x in range(100):
         tables.append('%s%s' % ('CompanyDiretory_', str(x), ))
     tables_num = 5
@@ -33,9 +31,9 @@ def get_sql_cpname(params=None):
     for table in tables:
         if i >= tables_num:
             break
-        i = i + 1
+        i += 1
         print(table)
-        companys_table_list = db.query_all("select CompanyName from " + table + " order by rand() " + limit_condition, )
+        companys_table_list = db.query_all("select CompanyName from " + table + " order by rand() " + limit_condition)
         companys_list.extend(companys_table_list)
     db.release()
     return companys_list

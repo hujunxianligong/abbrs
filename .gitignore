@@ -8,6 +8,7 @@ logs/*.log
 log/*.log
 *.pid
 *.so
+test/*
 
 # venv
 env

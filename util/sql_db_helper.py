@@ -5,7 +5,7 @@ import traceback
 
 import config
 import pymysql
-
+from logger_manager import seg_api_logger as logger
 
 
 class DBHelper:

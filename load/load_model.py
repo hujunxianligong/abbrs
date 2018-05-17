@@ -1,124 +1,142 @@
 # -*- coding: UTF-8 -*
-import os
+from jpype import JClass
 
-import CRFPP
-import sys
 import config
-
-from bin.term_tuple import crf_reg_result, NameTerm, WordTerm
-
-'''
-成分识别类
-包括加载crf模型 识别解析
-'''
+from bin.jvm_crf_dic import SPCrf
+from logger_manager import seg_api_logger as logger
+from bin.term_tuple import CrfRegResult, NameTerm, WordTerm
 
 
 class RecCom:
-    def __init__(self, modelFile):
-        self.tagger = CRFPP.Tagger("-m " + modelFile)
+    def __init__(self, modelfile=None, nbest=None,):
+
+        if not nbest:
+            nbest = 1
+        if not modelfile:
+            assert False
+
+        ModelImpl = JClass('com.github.zhifac.crf4j.ModelImpl')
+        self.model = ModelImpl()
+        self.model.open(modelfile, nbest, 0, 1.0)
+
+        self.tagger = self.model.createTagger()
+        # self.tagger = CRFPP.Tagger('-n '+str(nbest)+' -m ' + modelfile)
+
         self.tagger.clear()
         self.begin = "#SENT_BEG#\tbegin"
         self.end = "#SENT_BEG#\tend"
         self.terms = []
 
     def _add(self, atts):
-        result = '\t'.join(atts)
+        result = '\t'.join(str(atts))
         self.tagger.add(result)
 
-    def _addTerms(self, termList):
+    def addterms(self, termlist):
         self._add(self.begin)
-        for term in termList:
+        for term in termlist:
             self._add(term)
         self._add(self.end)
 
-    def _clear(self):
+    def clear(self):
         self.terms.clear()
         self.tagger.clear()
 
-    def _parse(self):
-        if self.tagger.parse() == False:
+    def parse(self):
+        if not self.tagger.parse():
             return self.terms
-        for i in range(0, self.tagger.size()):
-            test = self.tagger.y2(i)
-            term = crf_reg_result(self.tagger.x(i, 0))
-            term.set_wheater(self.tagger.y2(i))
-            self.terms.append(term)
+        # for i in range(0, self.tagger.size()):
+        #     term = crf_reg_result(self.tagger.x(i, 0))
+        #     term.set_wheater(self.tagger.y2(i))
+        #     self.terms.append(term)
+
+        #for n in range(self.tagger.nbest()):
+        for n in range(self.model.getNbest_()):
+            if not self.model.getNbest_():
+                break
+            termlist = []
+            for i in range(self.tagger.size()):
+                term = CrfRegResult(self.tagger.x(i, 0))
+                term.set_wheater(self.tagger.yname(self.tagger.y(i)))
+                termlist.append(term)
+            self.terms.append(termlist)
         return self.terms
 
 
-def reg_result_classify(company_name, richTermList):
+def reg_result_classify(company_name, rich_termlist):
     result = NameTerm(company_name)
     s_offset = 0
     e_offset = 0
-    str = ''
-    type = 'OUT'
-    for richterm in richTermList:
+    word_str = ''
+    word_type = 'OUT'
+    for richterm in rich_termlist:
         if richterm.char == '#':
             continue
-        before_type = type
+        before_type = word_type
         mark = richterm.wheater
         if 'R' in mark:
-            type = 'R'
+            word_type = 'R'
         elif 'I' in mark:
-            type = 'I'
+            word_type = 'I'
         elif 'U' in mark:
-            type = 'U'
+            word_type = 'U'
         elif 'O' in mark:
-            type = 'O'
+            word_type = 'O'
 
         if '_S' in mark:
-            if str.strip():
-                one = WordTerm(str, s_offset, e_offset-1)
+            if word_str.strip():
+                one = WordTerm(word_str, s_offset, e_offset-1)
                 one.set_type(before_type)
                 result.add_word_term(one)
                 s_offset = e_offset
             one = WordTerm(richterm.char, s_offset, e_offset)
-            one.set_type(type)
+            one.set_type(word_type)
             result.add_word_term(one)
             s_offset += 1
             e_offset += 1
+            word_str = ''
         elif '_B' in mark:
-            if str.strip():
-                one = WordTerm(str, s_offset, e_offset-1)
+            if word_str.strip():
+                one = WordTerm(word_str, s_offset, e_offset-1)
                 one.set_type(before_type)
                 result.add_word_term(one)
                 s_offset = e_offset
-            str = ''
-            str = ''.join([str, richterm.char])
+            word_str = ''
+            word_str = ''.join([word_str, richterm.char])
             e_offset += 1
         elif '_M' in mark:
-            str = ''.join([str, richterm.char])
+            word_str = ''.join([word_str, richterm.char])
             e_offset += 1
         elif '_E' in mark:
-            str = ''.join([str, richterm.char])
-            one = WordTerm(str, s_offset, e_offset)
-            one.set_type(type)
+            word_str = ''.join([word_str, richterm.char])
+            one = WordTerm(word_str, s_offset, e_offset)
+            one.set_type(word_type)
             result.add_word_term(one)
-            str = ''
+            word_str = ''
             e_offset += 1
             s_offset = e_offset
-    if str.strip():
-        one = WordTerm(str, s_offset, e_offset)
-        one.set_type(type)
+    if word_str.strip():
+        one = WordTerm(word_str, s_offset, e_offset)
+        one.set_type(word_type)
         result.add_word_term(one)
     return result
 
 
-
-def get_model_abbr(company_name,G=None):
+def get_model_abbr(company_name, g=None):
     fullname = list(company_name)
-    if G and not str(G) == 'Namespace()':
-        recCom_instance = RecCom(G.load_model_path)
-    else:
-        recCom_instance = RecCom(config.CRF_MODEL_FILE)
+    SPCrf()
 
-    recCom_instance._addTerms(fullname)
-    richTermList = recCom_instance._parse()
-    result = reg_result_classify(company_name, richTermList)
+    if g and not str(g) == 'Namespace()':
+        rm_instance = RecCom(g.load_model_path)
+    else:
+        rm_instance = RecCom(config.CLASSSIFY_MODEL_FILE)
+        rm_instance.addterms(fullname)
+    rich_termlist = rm_instance.parse()
+    result = reg_result_classify(company_name, rich_termlist[0])
     result.merge_wterm_include_type(None)
-    print((result.set_api_json()))
-    recCom_instance._clear()
+    logger.info(result.set_api_json())
+    rm_instance.clear()
     return result
 
+
 if __name__ == '__main__':
-    get_model_abbr('上海野尻眼镜有限公司分公司')
+    print(get_model_abbr('中国电建集团成都勘测设计研究院有限公司').set_api_json())
