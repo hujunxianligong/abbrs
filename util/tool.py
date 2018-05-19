@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+import os
 from urllib.parse import urlparse
 
 import httplib2
@@ -26,6 +27,18 @@ def read_dic(filepath=None, c_type=None):
             content.sort(key=lambda x: len(x[0]), reverse=True)
 
     return content
+
+
+def get_closest_file(source_dir, suffix):
+    need_time = 0
+    for file in os.listdir(source_dir):
+        split_cont = file.split('_')
+        if len(split_cont) > 1:
+            file_timestamp = int(split_cont[0])
+            if file_timestamp > need_time:
+                need_time = file_timestamp
+
+    return ''.join([str(need_time), suffix])
 
 
 class NLPDriver(object):
@@ -67,3 +80,6 @@ class NLPDriver(object):
             print(exc_type, exc_val, exc_tb)
             return False
         return True
+
+
+

@@ -96,7 +96,7 @@ def get_trains_json(corpus_seg=None, timestamp=None):
             if i % 500 == 0:
                 print(i)
             # print(companyName, abbr)
-            # trans_train_json = set_need_json(companyName, abbr)
+            # trans_train_json = set_need_json(companyname, abbr)
             trans_train_json = set_need_json(companyname, abbr, classifly_)
             term_list = trans_train_json['full_name']
             sb = ''

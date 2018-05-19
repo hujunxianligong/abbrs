@@ -3,9 +3,10 @@ import os
 
 import config
 from jpype import *
+from logger_manager import seg_api_logger as logger
 
 
-class SPCrf:
+class HanlpJvm:
     def __init__(self):
         if not isJVMStarted():
             self.startup_jvm()
@@ -31,16 +32,23 @@ class SPCrf:
     def shut_jvm():
         shutdownJVM()
 
-    def crf_learn(self, args):
-        if not isJVMStarted():
-            self.startup_jvm()
-        c_crf_learn = JClass('com.github.zhifac.crf4j.CrfLearn')
-        assert c_crf_learn.run(args)
 
-    def crf_test(self, args):
-        if not isJVMStarted():
-            self.startup_jvm()
-        c_ctf_test = JClass('com.github.zhifac.crf4j.CrfTest')
-        assert c_ctf_test.run(args)
+def crf_learn(args):
+    # c_crf_learn = JClass('com.github.zhifac.crf4j.CrfLearn')
+    cmd_str = 'crf_learn'
+    for param in args:
+        cmd_str += ''.join([' ', param])
+    logger.info(cmd_str)
+    os.system(cmd_str)
+
+
+def crf_test(args):
+    # c_ctf_test = JClass('com.github.zhifac.crf4j.CrfTest')
+    cmd_str = 'crf_test'
+    for param in args:
+        cmd_str += ''.join([' ', param])
+    logger.info(cmd_str)
+    os.system(cmd_str)
+
 if __name__ == '__main__':
-    SPCrf()
+    HanlpJvm()

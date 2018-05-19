@@ -1,10 +1,13 @@
 # -*- coding: UTF-8 -*
-from jpype import JClass
+import os
+
+import CRFPP
 
 import config
-from bin.jvm_crf_dic import SPCrf
+from bin.jvm_crf_dic import HanlpJvm
 from logger_manager import seg_api_logger as logger
 from bin.term_tuple import CrfRegResult, NameTerm, WordTerm
+from util.tool import get_closest_file
 
 
 class RecCom:
@@ -15,12 +18,12 @@ class RecCom:
         if not modelfile:
             assert False
 
-        ModelImpl = JClass('com.github.zhifac.crf4j.ModelImpl')
-        self.model = ModelImpl()
-        self.model.open(modelfile, nbest, 0, 1.0)
-
-        self.tagger = self.model.createTagger()
-        # self.tagger = CRFPP.Tagger('-n '+str(nbest)+' -m ' + modelfile)
+        # ModelImpl = JClass('com.github.zhifac.crf4j.ModelImpl')
+        # self.model = ModelImpl()
+        # self.model.open(modelfile, nbest, 0, 1.0)
+        #
+        # self.tagger = self.model.createTagger()
+        self.tagger = CRFPP.Tagger('-n '+str(nbest)+' -m ' + modelfile)
 
         self.tagger.clear()
         self.begin = "#SENT_BEG#\tbegin"
@@ -49,9 +52,9 @@ class RecCom:
         #     term.set_wheater(self.tagger.y2(i))
         #     self.terms.append(term)
 
-        #for n in range(self.tagger.nbest()):
-        for n in range(self.model.getNbest_()):
-            if not self.model.getNbest_():
+        for n in range(self.tagger.nbest()):
+        # for n in range(self.model.getNbest_()):
+            if not self.tagger.next():
                 break
             termlist = []
             for i in range(self.tagger.size()):
@@ -123,11 +126,13 @@ def reg_result_classify(company_name, rich_termlist):
 
 def get_model_abbr(company_name, g=None):
     fullname = list(company_name)
-    SPCrf()
+    HanlpJvm()
 
     if g and not str(g) == 'Namespace()':
         rm_instance = RecCom(g.load_model_path)
     else:
+        if not os.path.exists(config.CLASSSIFY_MODEL_FILE):
+            config.CLASSSIFY_MODEL_FILE = get_closest_file(config.CLASSSIFY_MODEL_PATH, '_crf_abbr_classify_model')
         rm_instance = RecCom(config.CLASSSIFY_MODEL_FILE)
         rm_instance.addterms(fullname)
     rich_termlist = rm_instance.parse()

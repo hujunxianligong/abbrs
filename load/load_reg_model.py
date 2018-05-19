@@ -3,15 +3,15 @@ import tempfile
 import config
 from jpype import *
 
-from bin.jvm_crf_dic import SPCrf
+from bin.jvm_crf_dic import HanlpJvm, crf_test
 from bin.term_tuple import AbbrChar, AbbrWord
 from load.load_model import get_model_abbr, RecCom
-from util.tool import NLPDriver
+from util.tool import NLPDriver, test_asd, get_closest_file
 
 
 def demo_convert_pinyinlist(name):
     if not isJVMStarted():
-        SPCrf()
+        HanlpJvm()
 
     tokenizer = JClass('com.hankcs.hanlp.HanLP')
     pinyinlist = tokenizer.convertToPinyinList(name)
@@ -143,8 +143,6 @@ def load_model(arg, model_file_path=None, output_file_path=None):
     else:
         params = None
 
-    crf = SPCrf()
-
     if os.path.exists(arg):
         with open(arg, 'r') as fp:
             lines = fp.readlines()
@@ -154,6 +152,8 @@ def load_model(arg, model_file_path=None, output_file_path=None):
         test_file.seek(0)
     if not model_file_path:
         model_file_path = config.ABBR_MODEL_FILE
+        if not os.path.exists(model_file_path):
+            model_file_path = get_closest_file(config.ABBR_TRAIN_MODEL_PATH, '_crf_abbr_keep_model')
     if not output_file_path:
         tmp_outfile = tempfile.mkstemp()
         output_file_path = tmp_outfile[1]
@@ -170,11 +170,11 @@ def load_model(arg, model_file_path=None, output_file_path=None):
         params.extend(general_params)
         new_args = params
 
-    crf.crf_test(new_args)
+    crf_test(new_args)
 
     lines = tmp_file.readlines()
     abbrs_results = write_back_result(lines, output_file_path)
-    return output_file_path,abbrs_results
+    return output_file_path, abbrs_results
 
 if __name__ == '__main__':
     options = ['-n', '2', '-v', '0', '华为技术有限公司']
