@@ -10,8 +10,7 @@ from bin.jvm_crf_dic import HanlpJvm, crf_test
 from bin.term_tuple import AbbrChar, AbbrWord
 from load.load_model import get_model_abbr, RecCom
 from util.tool import NLPDriver, get_closest_file
-<<<<<<< HEAD
-=======
+
 
 
 class RegCom:
@@ -94,7 +93,7 @@ def parse_abbrs(company_name, model_file_path=None):
     parse_instance.clear()
 
     return abbrlist
->>>>>>> qp
+
 
 
 def demo_convert_pinyinlist(name):
