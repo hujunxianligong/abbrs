@@ -1,12 +1,93 @@
 import os
 import tempfile
+
+import CRFPP
+
 import config
 from jpype import *
 
 from bin.jvm_crf_dic import HanlpJvm, crf_test
 from bin.term_tuple import AbbrChar, AbbrWord
 from load.load_model import get_model_abbr, RecCom
-from util.tool import NLPDriver, test_asd, get_closest_file
+from util.tool import NLPDriver, get_closest_file
+
+
+class RegCom:
+    def __init__(self, modelfile=None, nbest=None,):
+        if not nbest:
+            nbest = 1
+        if not modelfile:
+            assert False
+        self.tagger = CRFPP.Tagger('-n '+str(nbest)+' -m ' + modelfile)
+        self.tagger.clear()
+        self.terms = []
+
+    def _add(self, atts):
+        #result = '\t'.join(str(atts))
+        self.tagger.add(str(atts))
+
+    def addterms(self, termlist):
+        for term in termlist:
+            self._add(term)
+
+
+    def clear(self):
+        self.terms.clear()
+        self.tagger.clear()
+
+    def parse(self):
+        parse_result = self.tagger.parse()
+        if not parse_result:
+            return self.terms
+
+        for n in range(self.tagger.nbest()):
+            termlist = []
+            for i in range(self.tagger.size()):
+                term = AbbrChar(self.tagger.x(i, 0), self.tagger.x(i, 2))
+                term.set_tone(self.tagger.x(i, 1))
+                # term.set_wheater(self.tagger.y2(i))
+                term.set_wheater(self.tagger.yname(self.tagger.y(i)))
+                termlist.append(term)
+            self.terms.append(termlist)
+
+        return self.terms
+
+
+def parse_abbrs(company_name, model_file_path=None):
+    fullname = set_full_name(company_name)
+    if not model_file_path:
+        model_file_path = get_closest_file(config.ABBR_TRAIN_MODEL_PATH, '_crf_abbr_keep_model')
+    parse_instance = RegCom(model_file_path, 4)
+
+    parse_instance.addterms(fullname)
+
+    rich_termlist = parse_instance.parse()
+
+    abbrlist = []
+    for termlist in rich_termlist:
+        sb = ''
+        for term in termlist:
+            if term.wheater == 'K':
+                sb = ''.join([sb, term.word])
+        if sb.strip() and sb not in abbrlist and len(sb) > 1:
+                abbrlist.append(sb)
+
+    ltc_abb_list = load_ltd_cp_abbr(company_name)
+
+    if len(abbrlist) < 2:
+        for abbr in ltc_abb_list:
+            if abbr not in abbrlist:
+                abbrlist.append(abbr)
+    else:
+        redup_ltc_abb_list = []
+        for abbr in ltc_abb_list:
+            if abbr not in abbrlist:
+                redup_ltc_abb_list.append(abbr)
+        abbrlist[2:2] = redup_ltc_abb_list
+
+    parse_instance.clear()
+
+    return abbrlist
 
 
 def demo_convert_pinyinlist(name):
@@ -51,71 +132,19 @@ def set_full_name(name):
     return terms_list
 
 
-def tran_test_corpus(arg):
-    if not arg:
-        return None
-    test_file = tempfile.NamedTemporaryFile()
-    sb = ''
-    if isinstance(arg, list):
-        for cp_name in arg:
-            termlist = set_full_name(cp_name)
-            for term in termlist:
-                sb = ''.join([sb, str(term), '\n'])
-            sb = ''.join([sb, '\n'])
-    elif isinstance(arg, str):
-        termlist = set_full_name(arg)
-        for term in termlist:
-            sb = ''.join([sb, str(term), '\n'])
-        sb = ''.join([sb, '\n'])
-
-    test_file.write(sb.encode('utf-8'))
-    return test_file
-
-
-def write_back_result(readlines,outputfile):
+def write_back_result(termlist, outputfile, wirte_is):
     abb_results = {}
-    abbr_list = []
-    for line in readlines:
-        if line == b'\n':
-            one_abb_result = AbbrWord(abbr_list)
-            full_name = one_abb_result.full_name
-            if full_name in abb_results:
-                abbrs = abb_results.get(full_name)
-                abbr = one_abb_result.get_abb()
-                if abbr.strip() and abbr not in abbrs:
-                    abbrs.append(abbr)
-                    #abb_results.update({full_name: abbrs})
-            else:
-                abb_results[full_name] = [one_abb_result.get_abb()]
-            abbr_list.clear()
-        elif line.decode('UTF-8').startswith("#"):
-            continue
-        else:
-            strs = line.decode('UTF-8').replace('\n', '').split('\t')
-            one_abbr_word = AbbrChar(strs[0], strs[2])
-            one_abbr_word.set_tone(strs[1])
-            one_abbr_word.set_wheater(strs[3])
-            abbr_list.append(one_abbr_word)
 
-    for (k, v) in abb_results.items():
-        ltc_abb_list = load_ltd_cp_abbr(k)
-        if len(v) < 2:
-            for abbr in ltc_abb_list:
-                if abbr not in v:
-                    v.append(abbr)
-        else:
-            redup_ltc_abb_list = []
-            for abbr in ltc_abb_list:
-                if abbr not in v:
-                    redup_ltc_abb_list.append(abbr)
-            v[2:2] = redup_ltc_abb_list
+    for term in termlist:
+        abb_results.update({term['full_name']: term['abbs']})
 
-    with open(outputfile, 'w') as f:
-        for (k, v) in abb_results.items():
-            lists = [k+'\t'+line + '\n' for line in v]
-            # lists = [k+'\t'+str(v) + '\n' ]
-            f.writelines(lists)
-    f.close()
+    if wirte_is:
+        with open(outputfile, 'w') as f:
+            for (k, v) in abb_results.items():
+                lists = [k+'\t'+line + '\n' for line in v]
+                # lists = [k+'\t'+str(v) + '\n' ]
+                f.writelines(lists)
+        f.close()
 
     return abb_results
 
@@ -131,8 +160,8 @@ def load_ltd_cp_abbr(company_name):
         for term in termlist:
             if term.wheater == 'K':
                 sb = ''.join([sb, term.char])
-            if sb.strip() and sb not in abbrlist and len(sb) > 1:
-                abbrlist.append(sb)
+        if sb.strip() and sb not in abbrlist and len(sb) > 1:
+            abbrlist.append(sb)
     return abbrlist
 
 
@@ -143,37 +172,22 @@ def load_model(arg, model_file_path=None, output_file_path=None):
     else:
         params = None
 
+    termlist = []
     if os.path.exists(arg):
         with open(arg, 'r') as fp:
             lines = fp.readlines()
-            test_file = tran_test_corpus(lines)
+            for line in lines:
+                name = line
+                term = parse_abbrs(line, model_file_path)
+                abbr_tuple = {'full_name': name, 'abbs': term}
+                termlist.append(abbr_tuple)
     else:
-        test_file = tran_test_corpus(arg)
-        test_file.seek(0)
-    if not model_file_path:
-        model_file_path = config.ABBR_MODEL_FILE
-        if not os.path.exists(model_file_path):
-            model_file_path = get_closest_file(config.ABBR_TRAIN_MODEL_PATH, '_crf_abbr_keep_model')
-    if not output_file_path:
-        tmp_outfile = tempfile.mkstemp()
-        output_file_path = tmp_outfile[1]
-        print('输出路径为%s', output_file_path)
+        term = parse_abbrs(arg, model_file_path)
+        abbr_tuple = {'full_name': arg, 'abbs': term}
+        termlist.append(abbr_tuple)
 
-    tmp_file = tempfile.NamedTemporaryFile()
-    try:
-        general_params = ['-m', model_file_path, test_file.name, '-o', tmp_file.name]
-    except AttributeError as ex:
-        print(ex)
-    if not params:
-        new_args = general_params
-    else:
-        params.extend(general_params)
-        new_args = params
+    abbrs_results = write_back_result(termlist, output_file_path, False)
 
-    crf_test(new_args)
-
-    lines = tmp_file.readlines()
-    abbrs_results = write_back_result(lines, output_file_path)
     return output_file_path, abbrs_results
 
 if __name__ == '__main__':
@@ -183,6 +197,7 @@ if __name__ == '__main__':
     # load_model(['-n', '5', '-v', '0', '/mnt/vol_0/wnd/usr/cmb_in/ing简称名单/180518/error_name.txt'], \
     #             model_file_path='/mnt/vol_0/wnd/usr/cmb_in/模型文件/1526474342_crf_abbr_keep_model')
     #print(load_ltd_cp_abbr('华为技术有限公司'))
-    while True:
-        load_model('华为技术有限公司')
+    # while True:
+    #     load_model(options)
+    print(parse_abbrs('九江鸿源消防科技有限公司'))
    # crf_test.crf_learn(['-h'])

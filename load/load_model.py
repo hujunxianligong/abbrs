@@ -47,21 +47,15 @@ class RecCom:
     def parse(self):
         if not self.tagger.parse():
             return self.terms
-        # for i in range(0, self.tagger.size()):
-        #     term = crf_reg_result(self.tagger.x(i, 0))
-        #     term.set_wheater(self.tagger.y2(i))
-        #     self.terms.append(term)
-
         for n in range(self.tagger.nbest()):
         # for n in range(self.model.getNbest_()):
-            if not self.tagger.next():
-                break
             termlist = []
             for i in range(self.tagger.size()):
                 term = CrfRegResult(self.tagger.x(i, 0))
                 term.set_wheater(self.tagger.yname(self.tagger.y(i)))
                 termlist.append(term)
             self.terms.append(termlist)
+
         return self.terms
 
 
@@ -126,15 +120,15 @@ def reg_result_classify(company_name, rich_termlist):
 
 def get_model_abbr(company_name, g=None):
     fullname = list(company_name)
-    HanlpJvm()
-
     if g and not str(g) == 'Namespace()':
         rm_instance = RecCom(g.load_model_path)
     else:
         if not os.path.exists(config.CLASSSIFY_MODEL_FILE):
             config.CLASSSIFY_MODEL_FILE = get_closest_file(config.CLASSSIFY_MODEL_PATH, '_crf_abbr_classify_model')
+
         rm_instance = RecCom(config.CLASSSIFY_MODEL_FILE)
         rm_instance.addterms(fullname)
+
     rich_termlist = rm_instance.parse()
     result = reg_result_classify(company_name, rich_termlist[0])
     result.merge_wterm_include_type(None)
