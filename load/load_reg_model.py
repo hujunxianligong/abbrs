@@ -20,27 +20,31 @@ class RegCom:
             assert False
         self.tagger = CRFPP.Tagger('-n '+str(nbest)+' -m ' + modelfile)
         self.tagger.clear()
+        self.begin = "#SENT_BEG#\tbegin\tOUT"
+        self.end = "#SENT_BEG#\tend\tOUT"
         self.terms = []
 
     def _add(self, atts):
-        #result = '\t'.join(str(atts))
-        self.tagger.add(str(atts))
+        result = str(atts)
+        self.tagger.add(result)
 
     def addterms(self, termlist):
+        self._add(self.begin)
         for term in termlist:
             self._add(term)
-
+        self._add(self.end)
 
     def clear(self):
         self.terms.clear()
         self.tagger.clear()
 
     def parse(self):
-        parse_result = self.tagger.parse()
-        if not parse_result:
+        if not self.tagger.parse():
             return self.terms
 
         for n in range(self.tagger.nbest()):
+            if not self.tagger.next():
+                break
             termlist = []
             for i in range(self.tagger.size()):
                 term = AbbrChar(self.tagger.x(i, 0), self.tagger.x(i, 2))
@@ -57,7 +61,7 @@ def parse_abbrs(company_name, model_file_path=None):
     fullname = set_full_name(company_name)
     if not model_file_path:
         model_file_path = get_closest_file(config.ABBR_TRAIN_MODEL_PATH, '_crf_abbr_keep_model')
-    parse_instance = RegCom(model_file_path, 4)
+    parse_instance = RegCom(model_file_path, 3)
 
     parse_instance.addterms(fullname)
 
@@ -151,7 +155,7 @@ def write_back_result(termlist, outputfile, wirte_is):
 
 def load_ltd_cp_abbr(company_name):
     fullname = set_full_name(company_name)
-    rm_instance = RecCom('/home/hadoop/wnd/usr/crf_cp_name_easy/171213_first_model/new_abbr_feature.crfpp', 2)
+    rm_instance = RecCom('/home/hadoop/wnd/usr/crf_cp_name_easy/171213_first_model/new_abbr_feature.crfpp', 4)
     rm_instance.addterms(fullname)
     rich_termlist = rm_instance.parse()
     abbrlist = []
