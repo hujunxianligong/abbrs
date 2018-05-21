@@ -14,6 +14,7 @@ $ sudo pip3 install -r requirements.txt
 
 ## make编译安装
 *  下载地址： https://taku910.github.io/crfpp/
+下载CRF++-0.58.tar.gz
 解压完毕后，进入软件主目录
 ```
 $ ./configure
@@ -47,7 +48,7 @@ ImportError:/home/×××/anaconda2/bin/.../libstdc++.so.6: versionGLIBCXX_3.4.XX
 ```
 请更新libgcc
 
-hanlp配置修改，请进入pyhanlp依赖目录下中替换`hanlp.properties`
+hanlp配置修改，请下载hanlp的自定义词典并解压并且在`cmb_abbr`目录下的`generate_stage/jar/hanlp.properties`配置对应的绝对路径
 ```
 /home/{$user}/.pyenv/versions/3.4.3/envs/env343/lib/python3.4/site-packages/pyhanlp/static
 ```
