@@ -6,7 +6,7 @@ from jpype import *
 from bin.jvm_crf_dic import HanlpJvm, crf_test
 from bin.term_tuple import AbbrChar, AbbrWord
 from load.load_model import get_model_abbr, RecCom
-from util.tool import NLPDriver, test_asd, get_closest_file
+from util.tool import NLPDriver, get_closest_file
 
 
 def demo_convert_pinyinlist(name):
@@ -122,7 +122,7 @@ def write_back_result(readlines,outputfile):
 
 def load_ltd_cp_abbr(company_name):
     fullname = set_full_name(company_name)
-    rm_instance = RecCom('/home/hadoop/wnd/usr/crf_cp_name_easy/171213_first_model/new_abbr_feature.crfpp', 2)
+    rm_instance = RecCom('/home/hadoop/wnd/usr/crf_cp_name_easy/171213_first_model/new_abbr_feature.crfpp', 5)
     rm_instance.addterms(fullname)
     rich_termlist = rm_instance.parse()
     abbrlist = []
@@ -177,12 +177,12 @@ def load_model(arg, model_file_path=None, output_file_path=None):
     return output_file_path, abbrs_results
 
 if __name__ == '__main__':
-    options = ['-n', '2', '-v', '0', '华为技术有限公司']
+    options = ['-n', '2', '-v', '0', '夢妮貿易有限公司']
     demo_convert_pinyinlist('华为技术有限公司')
     #learn_model(options)
     # load_model(['-n', '5', '-v', '0', '/mnt/vol_0/wnd/usr/cmb_in/ing简称名单/180518/error_name.txt'], \
     #             model_file_path='/mnt/vol_0/wnd/usr/cmb_in/模型文件/1526474342_crf_abbr_keep_model')
     #print(load_ltd_cp_abbr('华为技术有限公司'))
-    while True:
-        load_model('华为技术有限公司')
+    #while True:
+    load_model(options)
    # crf_test.crf_learn(['-h'])
