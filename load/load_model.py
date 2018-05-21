@@ -31,7 +31,7 @@ class RecCom:
         self.terms = []
 
     def _add(self, atts):
-        result = '\t'.join(str(atts))
+        result = str(atts)
         self.tagger.add(result)
 
     def addterms(self, termlist):
@@ -126,15 +126,15 @@ def reg_result_classify(company_name, rich_termlist):
 
 def get_model_abbr(company_name, g=None):
     fullname = list(company_name)
-    HanlpJvm()
-
     if g and not str(g) == 'Namespace()':
         rm_instance = RecCom(g.load_model_path)
     else:
         if not os.path.exists(config.CLASSSIFY_MODEL_FILE):
             config.CLASSSIFY_MODEL_FILE = get_closest_file(config.CLASSSIFY_MODEL_PATH, '_crf_abbr_classify_model')
+
         rm_instance = RecCom(config.CLASSSIFY_MODEL_FILE)
         rm_instance.addterms(fullname)
+
     rich_termlist = rm_instance.parse()
     result = reg_result_classify(company_name, rich_termlist[0])
     result.merge_wterm_include_type(None)

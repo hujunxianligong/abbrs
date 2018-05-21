@@ -38,7 +38,9 @@ def get_closest_file(source_dir, suffix):
             if file_timestamp > need_time:
                 need_time = file_timestamp
 
-    return ''.join([source_dir,str(need_time), suffix])
+
+    return ''.join([source_dir, str(need_time), suffix])
+
 
 
 class NLPDriver(object):

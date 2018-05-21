@@ -99,11 +99,12 @@ def get_trains_json(corpus_seg=None, timestamp=None):
             # trans_train_json = set_need_json(companyname, abbr)
             trans_train_json = set_need_json(companyname, abbr, classifly_)
             term_list = trans_train_json['full_name']
-            sb = ''
+            sb = '#SENT_BEG#\tbegin\tOUT\tOUT\n'
             for term in term_list:
                 sb = ''.join([sb, term['word'] + '\t' + str(term['tone'])
                               + '\t' + term['type_offset'] + '\t' + term['keep'] + '\n'])
                 # sb = ''.join([sb, term['word'] + '\t' + term['type_offset'] + '\t' + term['keep'] + '\n'])
+            sb = ''.join([sb, '#SENT_END#\tbegin\tOUT\tOUT\n'])
             if int(time.time()) % 10 % 5 == 3 and corpus_seg:
                 test_coarse_grain_file.write(''.join([companyname, '\t', abbr, '\n']))
                 test_fine_grain_file.write(sb+'\n')
