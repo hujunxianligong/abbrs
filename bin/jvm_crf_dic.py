@@ -3,7 +3,7 @@ import os
 
 import config
 from jpype import *
-from logger_manager import seg_api_logger as logger
+from logger_manager import reg_api_logger as logger
 
 
 class HanlpJvm:
@@ -19,12 +19,11 @@ class HanlpJvm:
                 java_class_path +=config.THIRD_JAVA_CLASS_PATH+file+":"
         #java_class_path = config.THIRD_JAVA_CLASS_PATH + '/'+config.CRF_CONST_JAR_PATH + ':'+config.HANLP_JAR_PATH
         try:
-            print(get_default_jvm_path())
             startJVM(getDefaultJVMPath(), '-Djava.class.path=' + java_class_path, '-Xms1g', '-Xmx1g')
         except JavaException as ex:
             if ex is java.lang.RuntimeException:
-                print("Caught the runtime exception : ", JavaException.message())
-                print(JavaException.stackTrace())
+                logger.error("Caught the runtime exception : ", JavaException.message())
+                logger.error(JavaException.stackTrace())
         predefine = JClass('com.hankcs.hanlp.utility.Predefine')
         predefine.HANLP_PROPERTIES_PATH = config.HANLP_PROPERTIES_FILE_PATH
 
@@ -50,5 +49,3 @@ def crf_test(args):
     logger.info(cmd_str)
     os.system(cmd_str)
 
-if __name__ == '__main__':
-    HanlpJvm()

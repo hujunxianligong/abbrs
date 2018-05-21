@@ -6,11 +6,10 @@ import CRFPP
 import config
 from jpype import *
 
-from bin.jvm_crf_dic import HanlpJvm, crf_test
-from bin.term_tuple import AbbrChar, AbbrWord
+from bin.jvm_crf_dic import HanlpJvm
+from bin.term_tuple import AbbrChar
 from load.load_model import get_model_abbr, RecCom
 from util.tool import NLPDriver, get_closest_file
-
 
 
 class RegCom:
@@ -50,7 +49,6 @@ class RegCom:
             for i in range(self.tagger.size()):
                 term = AbbrChar(self.tagger.x(i, 0), self.tagger.x(i, 2))
                 term.set_tone(self.tagger.x(i, 1))
-                # term.set_wheater(self.tagger.y2(i))
                 term.set_wheater(self.tagger.yname(self.tagger.y(i)))
                 termlist.append(term)
             self.terms.append(termlist)
@@ -58,11 +56,11 @@ class RegCom:
         return self.terms
 
 
-def parse_abbrs(company_name, model_file_path=None):
+def parse_abbrs(company_name, model_file_path=None, nbest=None):
     fullname = set_full_name(company_name)
     if not model_file_path:
         model_file_path = get_closest_file(config.ABBR_TRAIN_MODEL_PATH, '_crf_abbr_keep_model')
-    parse_instance = RegCom(model_file_path, 3)
+    parse_instance = RegCom(model_file_path, nbest)
 
     parse_instance.addterms(fullname)
 
@@ -93,7 +91,6 @@ def parse_abbrs(company_name, model_file_path=None):
     parse_instance.clear()
 
     return abbrlist
-
 
 
 def demo_convert_pinyinlist(name):
@@ -138,26 +135,25 @@ def set_full_name(name):
     return terms_list
 
 
-def write_back_result(termlist, outputfile, wirte_is):
+def write_back_result(termlist, outputfile):
     abb_results = {}
 
     for term in termlist:
         abb_results.update({term['full_name']: term['abbs']})
 
-    if wirte_is:
-        with open(outputfile, 'w') as f:
-            for (k, v) in abb_results.items():
-                lists = [k+'\t'+line + '\n' for line in v]
-                # lists = [k+'\t'+str(v) + '\n' ]
-                f.writelines(lists)
-        f.close()
+    with open(outputfile, 'w') as f:
+        for (k, v) in abb_results.items():
+            lists = [k+'\t'+line + '\n' for line in v]
+            # lists = [k+'\t'+str(v) + '\n' ]
+            f.writelines(lists)
+    f.close()
 
     return abb_results
 
 
 def load_ltd_cp_abbr(company_name):
     fullname = set_full_name(company_name)
-    rm_instance = RecCom('/home/hadoop/wnd/usr/crf_cp_name_easy/171213_first_model/new_abbr_feature.crfpp', 5)
+    rm_instance = RecCom('/home/hadoop/wnd/usr/crf_cp_name_easy/171213_first_model/new_abbr_feature.crfpp', 3)
     rm_instance.addterms(fullname)
     rich_termlist = rm_instance.parse()
     abbrlist = []
@@ -183,27 +179,26 @@ def load_model(arg, model_file_path=None, output_file_path=None):
         with open(arg, 'r') as fp:
             lines = fp.readlines()
             for line in lines:
-                name = line
-                term = parse_abbrs(line, model_file_path)
+                name = line.strip()
+                term = parse_abbrs(line, model_file_path, 5)
                 abbr_tuple = {'full_name': name, 'abbs': term}
                 termlist.append(abbr_tuple)
+                print(name)
     else:
-        term = parse_abbrs(arg, model_file_path)
+        print(arg)
+        term = parse_abbrs(arg, model_file_path, 5)
         abbr_tuple = {'full_name': arg, 'abbs': term}
         termlist.append(abbr_tuple)
 
-    abbrs_results = write_back_result(termlist, output_file_path, False)
+    if not output_file_path:
+        tmp_outfile = tempfile.mkstemp()
+        output_file_path = tmp_outfile[1]
+        print('输出路径为%s', output_file_path)
+
+    abbrs_results = write_back_result(termlist, output_file_path)
 
     return output_file_path, abbrs_results
 
 if __name__ == '__main__':
-    options = ['-n', '2', '-v', '0', '夢妮貿易有限公司']
-    demo_convert_pinyinlist('华为技术有限公司')
-    #learn_model(options)
-    # load_model(['-n', '5', '-v', '0', '/mnt/vol_0/wnd/usr/cmb_in/ing简称名单/180518/error_name.txt'], \
-    #             model_file_path='/mnt/vol_0/wnd/usr/cmb_in/模型文件/1526474342_crf_abbr_keep_model')
-    #print(load_ltd_cp_abbr('华为技术有限公司'))
-    # while True:
-    #     load_model(options)
-    print(parse_abbrs('九江鸿源消防科技有限公司'))
-   # crf_test.crf_learn(['-h'])
+    options = ['-n', '2', '-v', '0', '/mnt/vol_0/wnd/usr/cmb_in/generate_stage/pretreatment/180521/1526890887_test_name']
+    load_model(options)

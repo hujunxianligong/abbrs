@@ -4,6 +4,7 @@ import time
 import config
 from bin.term_tuple import NameTerm, WordTerm, CharTerm, WORD_TYPE
 from preprocessor.get_corpus import get_sql_cpname
+from logger_manager import seg_api_logger as logger
 
 from util.tool import read_dic
 
@@ -72,7 +73,6 @@ class Pretreatment:
         return
 
     def one_parse(self, cp):
-        print(cp)
         cp = re.sub('[\(（）\)]', '', cp)
         cp_term = NameTerm(cp)
         # 获取单词与词性
@@ -90,7 +90,6 @@ class Pretreatment:
         cp_term.deduplication_word()
         self.modify_illegal_classify(cp_term)
         cp_term.merge_wterm_include_type('U')
-        print(cp_term.set_api_json())
         return cp_term
 
     def modify_illegal_classify(self, cp_term):

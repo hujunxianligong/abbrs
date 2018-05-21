@@ -10,11 +10,10 @@ from flask import Flask
 from flask import request
 from load.load_model import get_model_abbr
 import config as sys_config
-from load.load_reg_model import load_model, parse_abbrs
-from logger_manager import seg_api_logger as logger
+from load.load_reg_model import parse_abbrs
+from logger_manager import seg_api_logger,reg_api_logger
 from preprocessor.corpus_classify_train import Pretreatment
 from train.classify_train_model import train_model
-from util.tool import NLPDriver
 
 app = Flask(__name__)
 
@@ -27,11 +26,9 @@ def abb_classify():
         for key in data:
             data = key
             break
-        print(data)
         data = re.sub('[\(（）\)]', '', data)
     else:
         data = re.sub('[\(（）\)]', '', data.decode('UTF-8'))
-    logger.info(G)
     result = get_model_abbr(data, G)
     json = result.set_api_json()
     del result
@@ -42,14 +39,13 @@ def abb_classify():
 def abb_generate():
     name = request.form['companyName']
     data = re.sub('[\(（）\)]', '', name)
-    options = ['-n', '5', '-v', '0', data]
-    abbrs_results = parse_abbrs(options)
+    abbrs_results = parse_abbrs(data, None, 5)
     ret = dict()
     ret['full_name'] = name
     ret['abbs'] = abbrs_results
-    print(json.dumps(ret, ensure_ascii=False).encode('UTF-8'))
+    reg_api_logger.info(ret)
+    del abbrs_results
     return json.dumps(ret, ensure_ascii=False).encode('UTF-8')
-
 
 
 def save_pid(path, pid):
@@ -75,7 +71,7 @@ def detach_proc(func, pid_file):
         func()
     else:
         # saved PID of child process
-        logger.info('Daemon process detached at PID: ' + str(pid))
+        seg_api_logger.info('Daemon process detached at PID: ' + str(pid))
         save_pid(pid_file, pid)
 
 G = None

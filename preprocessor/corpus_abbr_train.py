@@ -7,6 +7,7 @@ import xlrd
 
 from bin.term_tuple import AbbrChar
 from load.load_reg_model import set_full_name, demo_convert_pinyinlist
+from logger_manager import reg_api_logger as logger
 
 
 def set_need_json(comapany, abbr, classifly_=None):
@@ -32,7 +33,7 @@ def set_need_json(comapany, abbr, classifly_=None):
         try:
             full_name.append(term.set_json())
         except AttributeError as ex:
-            print(ex)
+            logger.error(ex)
     one_result = {"full_name": full_name, "abbrs": abbrs, "name": comapany}
     return one_result
 
@@ -56,7 +57,7 @@ def set_full_name_2(companyname,classifly_):
             termslist[j].set_tone(tone)
             j += 1
     except IndexError as ex:
-        print(ex)
+        logger.error(ex)
     return termslist
 
 

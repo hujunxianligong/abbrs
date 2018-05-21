@@ -4,7 +4,6 @@ import os
 import CRFPP
 
 import config
-from bin.jvm_crf_dic import HanlpJvm
 from logger_manager import seg_api_logger as logger
 from bin.term_tuple import CrfRegResult, NameTerm, WordTerm
 from util.tool import get_closest_file
@@ -18,13 +17,7 @@ class RecCom:
         if not modelfile:
             assert False
 
-        # ModelImpl = JClass('com.github.zhifac.crf4j.ModelImpl')
-        # self.model = ModelImpl()
-        # self.model.open(modelfile, nbest, 0, 1.0)
-        #
-        # self.tagger = self.model.createTagger()
         self.tagger = CRFPP.Tagger('-n '+str(nbest)+' -m ' + modelfile)
-
         self.tagger.clear()
         self.begin = "#SENT_BEG#\tbegin"
         self.end = "#SENT_BEG#\tend"
@@ -47,13 +40,7 @@ class RecCom:
     def parse(self):
         if not self.tagger.parse():
             return self.terms
-        # for i in range(0, self.tagger.size()):
-        #     term = crf_reg_result(self.tagger.x(i, 0))
-        #     term.set_wheater(self.tagger.y2(i))
-        #     self.terms.append(term)
-
         for n in range(self.tagger.nbest()):
-        # for n in range(self.model.getNbest_()):
             if not self.tagger.next():
                 break
             termlist = []

@@ -25,3 +25,4 @@ def __get_logger(logger_name):
 
 
 seg_api_logger = __get_logger('seg_api')
+reg_api_logger = __get_logger('reg_api')

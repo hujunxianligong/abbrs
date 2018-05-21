@@ -27,7 +27,6 @@ def train_model(args, template_file_path=None, corpus_file_path=None, out_path=N
 if __name__ == '__main__':
 
     options = ['-f', '1', '-c', '1']
-    #options = ['-h']
     train_model(options, template_file_path=None,
-                corpus_file_path=None,#'/mnt/vol_0/wnd/usr/cmb_in/语料预处理结果/180516/1526327820_new_train_feature.crfpp'
+                corpus_file_path=None,
                 out_path=None)
