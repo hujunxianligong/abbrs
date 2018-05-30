@@ -90,7 +90,18 @@ def parse_abbrs(company_name, model_file_path=None, nbest=None):
 
     parse_instance.clear()
 
-    return abbrlist
+    return limit_abbrlist(company_name, abbrlist)
+
+
+# 限定简称中不能有全称，最多返回5个简称
+def limit_abbrlist(company_name, abbrlist):
+    ret_list = []
+    for abbr in abbrlist:
+        if abbr != company_name and abbr not in ret_list:
+            ret_list.append(abbr)
+        if len(ret_list) == 5:
+            break
+    return ret_list
 
 
 def demo_convert_pinyinlist(name):
