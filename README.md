@@ -1,10 +1,39 @@
-# 使用说明 
- 
-该代码版本主要是做训练集生成以及加载模型运行接口调用，模型的训练部分请自行参考CRF++训练模型
+# abbrs
+基于双层条件随机场的中文公司名简称生成
+* Flask架构，提供高可用的API服务
+* Argparse设计，便于命令操作
+* 基于HMM的前向后向算法构建有向概率图
+* 基于维特比算法构建的解析求解最大概率解
+* 完整流程，从语料到训练集至模型生成 
+* 更多特性等你发现……
 
+
+# 组件介绍
+分为两层处理，分类（classify）与切分（seg）。
+
+## classify
+将公司名基于自定义类型做分类，为之后简称缩略模型提供支持以及规则模型提供支持
+
+## seg
+利用classify结果结合其他特征来获取最终简称集合
+
+# 目录介绍
+* project
+    * bin  //中间交换结构   
+    * doc 
+    * load  //加载模型
+    * preprocessor  //预处理语语料
+    * train  //训练模型
+    * util  //工具
+  app.py  //API入口
+  config.py  //配置
+
+
+# 环境准备 
+ 
 ## python环境
 请使用python3环境进行操作
-## pip安装包
+### pip安装包
 ```bash
 $ sudo apt-get install python3-pip
 $ sudo pip3 install --upgrade pip
@@ -12,7 +41,7 @@ $ sudo pip3 install -r requirements.txt
 
 ```
 
-## make编译安装
+### make编译安装
 *  下载地址： https://taku910.github.io/crfpp/
 下载CRF++-0.58.tar.gz
 解压完毕后，进入软件主目录
@@ -32,10 +61,12 @@ $ sudo python3 setup.py install
 ```
 error: Setup script exited with error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
 ```
-````
+
 安装以下依赖
+```
 $ sudo apt-get install python3-dev
-````
+```
+
 依赖软链接
 ```
 $ sudo ln -s /usr/local/lib/libcrfpp.so.0 /usr/lib/
@@ -54,7 +85,7 @@ hanlp配置修改，请下载hanlp的自定义词典并解压并且在`cmb_abbr`
 ```
 路径可能略有差别。
 
-## 运行注意
+### 运行注意
 
 
 * 配置文件设置
