@@ -24,9 +24,9 @@
     * load  //加载模型
     * preprocessor  //预处理语语料
     * train  //训练模型
-    * util  //工具
-  app.py  //API入口
-  config.py  //配置
+    * util  //工具 <br>
+  app.py  //API入口 <br>
+  config.py  //配置 <br>
 
 
 # 环境准备 
